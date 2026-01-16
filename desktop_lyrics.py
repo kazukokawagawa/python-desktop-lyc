@@ -328,6 +328,11 @@ class DesktopLyricWindow(QWidget):
         self.worker.signal_status.connect(self.handle_status_change)
         self.worker.start()
 
+        # 强力置顶定时器
+        self.keep_top_timer = QTimer(self)
+        self.keep_top_timer.timeout.connect(self._enforce_top_most)
+        self.keep_top_timer.start(100)  # 每100ms强制置顶一次
+
     def init_ui(self):
         # 1. 窗口属性
         self.setWindowFlags(
@@ -415,11 +420,24 @@ class DesktopLyricWindow(QWidget):
         self.resize(self.window_width + 20, 50)
         
         # 默认放在屏幕中心
+        # 默认放在屏幕顶部居中
         center_x = (screen.width() - self.width()) // 2
-        center_y = (screen.height() - self.height()) // 2
-        self.move(center_x, center_y)
+        self.move(center_x, 0)
         self.show()
         self.activateWindow()
+
+    def _enforce_top_most(self):
+        """使用 Windows API 强制置顶"""
+        hwnd = self.winId()
+        try:
+            # HWND_TOPMOST = -1
+            # SWP_NOMOVE = 0x0002
+            # SWP_NOSIZE = 0x0001
+            # SWP_NOACTIVATE = 0x0010
+            ctypes.windll.user32.SetWindowPos(int(hwnd), -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)
+            self.raise_()  # 同时调用 Qt 的 raise
+        except Exception:
+            pass
 
     def update_text_ui(self, line_data, current_time=None, animate=False):
         """更新歌词显示，支持卡拉OK模式"""
