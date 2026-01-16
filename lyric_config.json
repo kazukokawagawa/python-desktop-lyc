@@ -1,0 +1,9 @@
+{
+    "main_font_size": 24,
+    "trans_font_size": 13,
+    "bg_font_size": 14,
+    "main_size_no_bg": 24,
+    "main_size_with_bg": 17,
+    "font_family": "Microsoft YaHei UI",
+    "window_width": 1200
+}
